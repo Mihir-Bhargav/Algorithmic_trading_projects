@@ -210,3 +210,4 @@ from sklearn.multiclass import OneVsRestClassifier # added (from sklearn v. 1.7)
 # Trading locallt could be risky and unstable; What if your laptop dies, or loses internet connection? You would most likley not close positions as wished and lose money. For this, reason, it would be a good idea to trade using cloud services. 
 # --------------------------------------------------------------------------------------------------------------------------
 
+print("Testing after changing the name of the dir")
