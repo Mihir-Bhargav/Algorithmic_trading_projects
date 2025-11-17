@@ -709,20 +709,23 @@ plt.style.use("seaborn-v0_8")
 # print(rec.cal_hypot())
 # print(rec.cal_perimeter())
 
-import random
-import math
-count = 0
+# import random
+# import math
+# count = 0
 
 
-count = 0
+# count = 0
 
-for i in range(0, 101):
-    random_dec = random.random()
-    one_to_six = math.floor(random_dec * 6 + 1)
+# for i in range(0, 101):
+#     random_dec = random.random()
+#     one_to_six = math.floor(random_dec * 6 + 1)
 
-    random_dec_2 = random.random()
-    one_to_six_2 = math.floor(random_dec_2 * 6 + 1)
+#     random_dec_2 = random.random()
+#     one_to_six_2 = math.floor(random_dec_2 * 6 + 1)
 
-    if one_to_six == one_to_six_2:
-        count += 1
-        print(f"Match #{count}: {one_to_six} == {one_to_six_2}")
+#     if one_to_six == one_to_six_2:
+#         count += 1
+#         print(f"Match #{count}: {one_to_six} == {one_to_six_2}") 
+
+
+print("GITHUB is working!!!")
