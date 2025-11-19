@@ -25,6 +25,11 @@ def monte_carlo_simulations(S0= 100, mu=0.05, sigma= 0.2, T= 1, steps= 252, N =1
     for i in range(N):
         path = basic_calc(S0, mu, sigma, T, steps)
         finals[i] = path[-1]
+        
+    print(f" Expected final price : {np.mean(final_prices)}" )
+    print(f" Expexted Standard deviation: {np.std(final_prices)} ") 
+    
+
     return finals 
 
 final_prices = monte_carlo_simulations()
@@ -37,4 +42,11 @@ plt.title("Normal Distribution with Browninan motion")
 plt.xlabel("Final price")
 plt.ylabel("freq")  
 plt.show()
+
+
+def brownian_motion_strat(): 
+    brownian_price = basic_calc() 
+    return brownian_price
+
+
 
