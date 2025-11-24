@@ -2,7 +2,9 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from ib_async import * 
 plt.style.use("seaborn-v0_8")
+from datetime import datetime
 
 
 class IterativeBase():
@@ -33,15 +35,56 @@ class IterativeBase():
         self.trades = 0
         self.position = 0
         self.use_spread = use_spread
-        self.get_data()
-    
-    def get_data(self):
-        ''' Imports the data from detailed.csv (source can be changed).
-        '''
-        raw = pd.read_csv("detailed.csv", parse_dates = ["time"], index_col = "time").dropna()
-        raw = raw.loc[self.start:self.end].copy()
-        raw["returns"] = np.log(raw.price / raw.price.shift(1))
-        self.data = raw
+        self.ib = IB()
+        self.ib.connect('127.0.0.1', 7497, clientId=1)
+        print("Connected:", self.ib.isConnected())
+            
+    def get_data(self, symbol, expiry, strike, right):
+        
+        """Fetch option data from IBKR in the simplest and most robust way. Note it requires IBKR TWS installed and opened."""
+
+        ib = self.ib
+        if not ib.isConnected():
+            print("Connecting to IBKR...")
+            ib.connect('127.0.0.1', 7497, clientId=1)
+            print("Connected:", ib.isConnected())
+            ib.time.sleep(1)  # Give IBKR a moment to establish connection
+
+        # Define contract
+        contract = Option(
+            symbol=symbol,
+            lastTradeDateOrContractMonth=expiry,
+            strike=strike,
+            right=right,
+            exchange='NSE',
+            currency='INR'
+        )
+
+        # Fetch historical data
+        data = ib.reqHistoricalData(
+            contract,
+            endDateTime='',
+            durationStr='1 W',
+            barSizeSetting='3m',
+            whatToShow='MIDPOINT',
+            useRTH=True
+        )
+
+        # Convert to DataFrame
+        df = util.df(data)
+
+        if df is None or df.empty():
+            print(f"⚠️ No data returned for {symbol} {strike}{right}.")
+            return None
+
+        # Convert to DataFrame
+        df = util.df(data)
+        df.rename(columns={"close": "price", "high": "High", "low": "Low"}, inplace=True)
+        df["returns"] = np.log(df["price"] / df["price"].shift(1))
+        df["spread"] = 0.005 * (df["High"] - df["Low"])
+        df = df[["price", "spread", "returns"]].dropna().copy()
+        self.data = df
+        return df
 
     def plot_data(self, cols = None):  
         ''' Plots the closing price for the symbol.
@@ -119,4 +162,7 @@ class IterativeBase():
         self.print_current_balance(bar)
         print("{} | net performance (%) = {}".format(date, round(perf, 2) ))
         print("{} | number of trades executed = {}".format(date, self.trades))
-        print(75 * "-")
+        print(75 * "-") 
+
+
+ticker = IterativeBase("")
