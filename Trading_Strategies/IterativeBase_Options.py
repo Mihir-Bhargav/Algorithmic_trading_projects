@@ -10,47 +10,34 @@ from datetime import datetime
 class IterativeBase():
     ''' Base class for iterative (event-driven) backtesting of trading strategies.
     '''
-
-    def __init__(self, symbol, start, end, amount, use_spread = True):
-        '''
-        Parameters
-        ----------
-        symbol: str
-            ticker symbol (instrument) to be backtested
-        start: str
-            start date for data import
-        end: str
-            end date for data import
-        amount: float
-            initial amount to be invested per trade
-        use_spread: boolean (default = True) 
-            whether trading costs (bid-ask spread) are included
-        '''
+    def __init__(self, symbol, expiry, strike, right, amount, use_spread=True):
         self.symbol = symbol
-        self.start = start
-        self.end = end
+        self.expiry = expiry
+        self.strike = strike
+        self.right = right
         self.initial_balance = amount
         self.current_balance = amount
         self.units = 0
         self.trades = 0
-        self.position = 0
         self.use_spread = use_spread
+
         self.ib = IB()
-        self.ib.connect('127.0.0.1', 7497, clientId=1)
-        print("Connected:", self.ib.isConnected())
-            
-    def get_data(self, symbol, expiry, strike, right):
-        
-        """Fetch option data from IBKR in the simplest and most robust way. Note it requires IBKR TWS installed and opened."""
+        try:
+            self.ib.connect('127.0.0.1', 7497, clientId=1)
+            print("Connected:", self.ib.isConnected())
+        except Exception as e:
+            print("IBKR connection failed:", e)
 
+        self.get_data()
+
+    def get_data(self):
         ib = self.ib
-        if not ib.isConnected():
-            print("Connecting to IBKR...")
-            ib.connect('127.0.0.1', 7497, clientId=1)
-            print("Connected:", ib.isConnected())
-            ib.time.sleep(1)  # Give IBKR a moment to establish connection
+        
+        symbol  = self.symbol
+        expiry  = self.expiry
+        strike  = self.strike
+        right   = self.right
 
-        # Define contract
         contract = Option(
             symbol=symbol,
             lastTradeDateOrContractMonth=expiry,
@@ -60,29 +47,28 @@ class IterativeBase():
             currency='INR'
         )
 
-        # Fetch historical data
         data = ib.reqHistoricalData(
             contract,
             endDateTime='',
-            durationStr='1 W',
-            barSizeSetting='3m',
+            durationStr='1 M',
+            barSizeSetting='3 mins',
             whatToShow='MIDPOINT',
             useRTH=True
         )
 
-        # Convert to DataFrame
         df = util.df(data)
+        if df is None or df.empty:
+            print("No data returned.")
+            return
 
-        if df is None or df.empty():
-            print(f"⚠️ No data returned for {symbol} {strike}{right}.")
-            return None
+        df.set_index("date", inplace=True)
+        df.index = pd.to_datetime(df.index)
 
-        # Convert to DataFrame
-        df = util.df(data)
         df.rename(columns={"close": "price", "high": "High", "low": "Low"}, inplace=True)
         df["returns"] = np.log(df["price"] / df["price"].shift(1))
-        df["spread"] = 0.005 * (df["High"] - df["Low"])
-        df = df[["price", "spread", "returns"]].dropna().copy()
+        df["spread"] = (df["High"] - df["Low"]) / 2
+        df = df[["price", "spread", "returns"]].dropna()
+
         self.data = df
         return df
 
@@ -165,4 +151,46 @@ class IterativeBase():
         print(75 * "-") 
 
 
-ticker = IterativeBase("")
+ticker = IterativeBase("BANKNIFTY", "20251125", "59000", "C", 28000, True)
+df = ticker.get_data()
+
+print("=== DATA PREVIEW ===")
+print(df.head())
+
+print("\n=== TEST get_values ===")
+for bar in range(3):  # test first 3 bars
+    date, price, spread = ticker.get_values(bar)
+    print(f"Bar {bar}: date={date}, price={price}, spread={spread}")
+
+print("\n=== print_current_balance ===")
+ticker.print_current_balance(0)
+
+print("\n=== buy_instrument ===")
+ticker.buy_instrument(bar=0, amount=5000)  # buy with a portion of initial balance
+ticker.print_current_balance(0)
+ticker.print_current_position_value(0)
+ticker.print_current_nav(0)
+
+print("\n=== sell_instrument ===")
+ticker.sell_instrument(bar=1, units=10)  # sell some units
+ticker.print_current_balance(1)
+ticker.print_current_position_value(1)
+ticker.print_current_nav(1)
+
+print("\n=== buying and selling more ===")
+ticker.buy_instrument(bar=2, units=50)
+ticker.sell_instrument(bar=2, amount=2000)
+ticker.print_current_balance(2)
+ticker.print_current_position_value(2)
+ticker.print_current_nav(2)
+
+print("\n=== close_pos ===")
+ticker.close_pos(bar=204)  # close remaining units
+ticker.print_current_balance(2)
+ticker.print_current_position_value(2)
+ticker.print_current_nav(2)
+
+print("\n===plot_data ===")
+ticker.plot_data() 
+
+
