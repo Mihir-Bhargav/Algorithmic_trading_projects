@@ -157,46 +157,5 @@ class IterativeBase():
         print(75 * "-") 
 
 
-ticker = IterativeBase("BANKNIFTY", "20251125", "59000", "C", 28000, True)
-df = ticker.get_data()
-
-print("=== DATA PREVIEW ===")
-print(df.head()) # type: ignore
-
-print("\n=== TEST get_values ===")
-for bar in range(3):  # test first 3 bars
-    date, price, spread = ticker.get_values(bar)
-    print(f"Bar {bar}: date={date}, price={price}, spread={spread}")
-
-print("\n=== print_current_balance ===")
-ticker.print_current_balance(0)
-
-print("\n=== buy_instrument ===")
-ticker.buy_instrument(bar=0, amount=5000)  # buy with a portion of initial balance
-ticker.print_current_balance(0)
-ticker.print_current_position_value(0)
-ticker.print_current_nav(0)
-
-print("\n=== sell_instrument ===")
-ticker.sell_instrument(bar=1, units=10)  # sell some units
-ticker.print_current_balance(1)
-ticker.print_current_position_value(1)
-ticker.print_current_nav(1)
-
-print("\n=== buying and selling more ===")
-ticker.buy_instrument(bar=2, units=50)
-ticker.sell_instrument(bar=2, amount=2000)
-ticker.print_current_balance(2)
-ticker.print_current_position_value(2)
-ticker.print_current_nav(2)
-
-print("\n=== close_pos ===")
-ticker.close_pos(bar=204)  # close remaining units
-ticker.print_current_balance(2)
-ticker.print_current_position_value(2)
-ticker.print_current_nav(2)
-
-print("\n===plot_data ===")
-ticker.plot_data() 
 
 
