@@ -2,7 +2,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from ib_async import * 
+from ib_async import *  # type: ignore
 plt.style.use("seaborn-v0_8")
 from datetime import datetime
 
@@ -74,15 +74,21 @@ class IterativeBase():
 
     def plot_data(self, cols = None):  
         ''' Plots the closing price for the symbol.
-        '''
-        if cols is None:
-            cols = "price"
-        self.data[cols].plot(figsize = (12, 8), title = self.symbol)
-    
+            '''
+        df = self.data.copy()
+        plt.figure(figsize=(12, 6))
+        plt.title(f"{self.symbol}, Expiry: {self.expiry}, Strike: {self.strike}, {self.right}")
+        plt.xlabel("Bar number")
+        plt.ylabel("Price of option")
+        plt.xticks(rotation=45)
+        plt.plot(df)
+        plt.tight_layout()
+        plt.show()
+
     def get_values(self, bar):
         ''' Returns the date, the price and the spread for the given bar.
         '''
-        date = str(self.data.index[bar].date())
+        date = str(self.data.index[bar].date()) # type: ignore
         price = round(self.data.price.iloc[bar], 5)
         spread = round(self.data.spread.iloc[bar], 5)
         return date, price, spread
@@ -102,7 +108,7 @@ class IterativeBase():
         if amount is not None: # use units if units are passed, otherwise calculate units
             units = int(amount / price)
         self.current_balance -= units * price # reduce cash balance by "purchase price"
-        self.units += units
+        self.units += units # type: ignore
         self.trades += 1
         print("{} |  Buying {} for {}".format(date, units, round(price, 5)))
     
@@ -115,7 +121,7 @@ class IterativeBase():
         if amount is not None: # use units if units are passed, otherwise calculate units
             units = int(amount / price)
         self.current_balance += units * price # increases cash balance by "purchase price"
-        self.units -= units
+        self.units -= units # type: ignore
         self.trades += 1
         print("{} |  Selling {} for {}".format(date, units, round(price, 5)))
     
@@ -155,7 +161,7 @@ ticker = IterativeBase("BANKNIFTY", "20251125", "59000", "C", 28000, True)
 df = ticker.get_data()
 
 print("=== DATA PREVIEW ===")
-print(df.head())
+print(df.head()) # type: ignore
 
 print("\n=== TEST get_values ===")
 for bar in range(3):  # test first 3 bars
