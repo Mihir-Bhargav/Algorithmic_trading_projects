@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 from IterativeBase_Options import * # type ignore
 import pandas as pd
 
+
+# Although this strategy was made for day trading, it often fails for intra day as it assumes random walk and normal distribution, which is true over longer periods of time, but not volatile option markets. I instead suggest that this is used for finding ranges and trends, mathamatically and technically. Then use the ranges as a map to where the market might be headed.  
+
 class GBM_MonteCarlo_Strategy(IterativeBase):
     
     def simulate_forward_GBM(self, S0, mu=0.0, sigma=0.2, steps=10, paths=50, dt=1/252):
