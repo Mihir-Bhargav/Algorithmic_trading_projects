@@ -190,7 +190,9 @@ if __name__ == "__main__":
     backtester.plot_Scholes_Call(59200, 4/252)
 
     # Fetch option data and add to df
-    df = backtester.fetch_option_data(symbol='BANKNIFTY', strike=59200, right='C')
+    df = backtester.fetch_option_data(symbol='BANKNIFTY', strike=59500, right='C')
+    print(df)
+
 
     GBM_prices = backtester.brownian_motion()
     print(GBM_prices)

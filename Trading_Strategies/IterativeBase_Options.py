@@ -22,11 +22,13 @@ class IterativeBase():
         self.use_spread = use_spread
 
         self.ib = IB()
-        try:
-            self.ib.connect('127.0.0.1', 7497, clientId=1)
-            print("Connected:", self.ib.isConnected())
-        except Exception as e:
-            print("IBKR connection failed:", e)
+
+        if not self.ib.isConnected():
+            try:
+                self.ib.connect()
+                print("Connected:", self.ib.isConnected())
+            except Exception as e:
+                print("IBKR connection failed:", e)
 
         self.get_data()
 
@@ -155,7 +157,6 @@ class IterativeBase():
         print("{} | net performance (%) = {}".format(date, round(perf, 2) ))
         print("{} | number of trades executed = {}".format(date, self.trades))
         print(75 * "-") 
-
 
 
 
