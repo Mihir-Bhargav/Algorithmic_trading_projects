@@ -34,34 +34,34 @@ class IterativeBase():
 
     def get_data(self):
         ib = self.ib
-        
-        symbol  = self.symbol
-        expiry  = self.expiry
-        strike  = self.strike
-        right   = self.right
 
         contract = Option(
-            symbol=symbol,
-            lastTradeDateOrContractMonth=expiry,
-            strike=strike,
-            right=right,
+            symbol=self.symbol,
+            lastTradeDateOrContractMonth=self.expiry,
+            strike=self.strike,
+            right=self.right,
             exchange='NSE',
-            currency='INR'
+            currency='INR',
+            tradingClass='BANKNIFTY'
         )
+
+        # REQUIRED
+        ib.qualifyContracts(contract)
 
         data = ib.reqHistoricalData(
             contract,
             endDateTime='',
             durationStr='1 M',
             barSizeSetting='3 mins',
-            whatToShow='MIDPOINT',
-            useRTH=True
+            whatToShow='MIDPOINT',   # MIDPOINT often fails for options
+            useRTH=True,
+            formatDate=1
         )
 
         df = util.df(data)
         if df is None or df.empty:
             print("No data returned.")
-            return
+            return None
 
         df.set_index("date", inplace=True)
         df.index = pd.to_datetime(df.index)
@@ -73,6 +73,7 @@ class IterativeBase():
 
         self.data = df
         return df
+
 
     def plot_data(self, cols = None):  
         ''' Plots the closing price for the symbol.
@@ -159,4 +160,19 @@ class IterativeBase():
         print(75 * "-") 
 
 
+
+
+ticker = IterativeBase(
+    symbol="BANKNIFTY",
+    expiry="20251230",
+    strike=59500,
+    right="C",
+    amount=100000
+)
+
+# Data is already fetched in __init__
+df = ticker.get_data()
+print(df)
+df.to_csv("banknifty_20251230_59500.csv", index=False)
+print("CSV file saved successfully!")
 
