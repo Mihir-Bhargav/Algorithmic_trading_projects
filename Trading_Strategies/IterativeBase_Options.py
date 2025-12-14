@@ -52,7 +52,7 @@ class IterativeBase():
             contract,
             endDateTime='',
             durationStr='1 M',
-            barSizeSetting='3 mins',
+            barSizeSetting='5 mins',
             whatToShow='MIDPOINT',   # MIDPOINT often fails for options
             useRTH=True,
             formatDate=1
@@ -173,6 +173,8 @@ ticker = IterativeBase(
 # Data is already fetched in __init__
 df = ticker.get_data()
 print(df)
-df.to_csv("banknifty_20251230_59500.csv", index=False)
+df.to_csv("banknifty_20251230_59500_5m.csv", index=True)
 print("CSV file saved successfully!")
 
+
+# Note the frequency can be changes as wished. 
