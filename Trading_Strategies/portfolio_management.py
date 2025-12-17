@@ -42,10 +42,10 @@ class fetchData():
         plt.plot(x = "Date", y = "price")
         plt.show()
 
-# GLD_data = fetchData("GC=F", "2024-10-01", "2025-10-01")
-# GLD_data.getdata()
-# print(GLD_data.getdata()) 
-# print(GLD_data.calc_sharpe_ratio()) 
+GLD_data = fetchData("GC=F", "2024-10-01", "2025-10-01")
+GLD_data.getdata()
+print(GLD_data.getdata()) 
+print(GLD_data.calc_sharpe_ratio()) 
 
 SIL_data = fetchData("SI=F", "2024-10-01", "2025-10-01")
 print(SIL_data.getdata()) 
