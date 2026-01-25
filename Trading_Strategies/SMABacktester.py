@@ -120,4 +120,5 @@ class SMABacktester():
                             
         return opt, best_perf
         
-     
+
+
